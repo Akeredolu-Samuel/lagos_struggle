@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Lagos Struggle — Run Am!</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" width="480" height="720"></canvas>
+
+    <div id="hud" class="hidden">
+      <div class="hud-left">
+        <div class="stat">₦ <span id="score">0</span></div>
+        <div class="stat small">Best ₦ <span id="best">0</span></div>
+      </div>
+      <div class="hud-right">
+        <div class="stat small">x<span id="mult">1</span> · <span id="dist">0</span>m</div>
+      </div>
+    </div>
+    <div id="power-bar" class="hidden"></div>
+    <div id="event-banner" class="hidden"></div>
+
+    <div id="overlay" class="screen">
+      <div class="card">
+        <p class="tag">NAIJA RUNNER</p>
+        <h1>LAGOS<br/>STRUGGLE</h1>
+        <p class="sub">Run the streets. Dodge wahala. Collect naira.</p>
+        <p class="section-label">Choose your runner</p>
+        <div id="char-grid" class="char-grid"></div>
+        <button id="btn-start" class="btn primary">Start Running</button>
+        <div class="howto-mini">
+          <span><kbd>←</kbd><kbd>→</kbd> lanes</span>
+          <span><kbd>↑</kbd> jump</span>
+          <span><kbd>↓</kbd> roll</span>
+        </div>
+        <p class="hint">Swipe · Tap top = jump · Tap bottom = roll</p>
+      </div>
+    </div>
+
+    <div id="gameover" class="screen hidden">
+      <div class="card">
+        <p class="tag bad">YOU FALL DOWN!</p>
+        <h2 id="death-line">Wahala don catch you.</h2>
+        <div class="result-grid">
+          <div><span class="lbl">Naira</span><strong>₦<span id="final-score">0</span></strong></div>
+          <div><span class="lbl">Distance</span><strong><span id="final-dist">0</span>m</strong></div>
+          <div><span class="lbl">Best</span><strong>₦<span id="final-best">0</span></strong></div>
+          <div><span class="lbl">Coins</span><strong id="final-coins">0</strong></div>
+        </div>
+        <button id="btn-retry" class="btn primary">Run Again</button>
+        <button id="btn-home" class="btn ghost">Change Character</button>
+      </div>
+    </div>
+
+    <div id="pause" class="screen hidden">
+      <div class="card compact">
+        <h2>Paused</h2>
+        <button id="btn-resume" class="btn primary">Continue</button>
+        <button id="btn-quit" class="btn ghost">Quit to Menu</button>
+      </div>
+    </div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
