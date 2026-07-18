@@ -1,5 +1,7 @@
 # Lagos Struggle
 
+built by samwissy
+
 Subway Surfers–style endless runner set on Lagos streets. Dodge danfo and okada, collect naira, stack power-ups.
 
 **Play:** open `index.html` or deploy on [Vercel](https://vercel.com).
