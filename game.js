@@ -98,7 +98,7 @@
 
   const GRAV = 30, JUMP_V = 10.5, MEGA_V = 15.5;
   const P = { lane: 1, prev: 1, x: 0, y: 0, vy: 0, ground: true, rolling: false, rollT: 0, queueRoll: false, stumble: 0, invuln: 0, phase: 0, face: Math.PI, dustT: 0, landed: 0 };
-  const CH = { z: 26, x: 0, y: 0, phase: 0, closeT: 0, intro: 0, tauntT: 4, side: 1 };
+  const CH = { z: 26, x: 0, y: 0, phase: 0, closeT: 0, intro: 0, tauntT: 4, side: 1, slapped: false };
 
   /* ───────── game state ───────── */
   let state = "menu";
@@ -118,7 +118,7 @@
   const ui = {
     hud: $("hud"), menu: $("menu"), over: $("over"), pause: $("pause"),
     score: $("score"), naira: $("naira"), dist: $("dist"), best: $("best"), zone: $("zonechip"),
-    powers: $("powers"), toast: $("toast"), taunt: $("taunt"), heat: $("heat"), mult: $("mult"), banner: $("banner"),
+    powers: $("powers"), toast: $("toast"), taunt: $("taunt"), mult: $("mult"), banner: $("banner"),
   };
   const fmt = (n) => Math.floor(n).toLocaleString("en-NG");
   let toastT = 0, tauntT = 0, bannerT = 0;
@@ -247,11 +247,11 @@
     for (const k in pw) pw[k] = 0;
     if (selId === "student") pw.garri = 5;
     P.lane = P.prev = 1; P.x = 0; P.y = 0; P.vy = 0; P.ground = true; P.rolling = false; P.rollT = 0; P.queueRoll = false; P.stumble = 0; P.invuln = 0; P.phase = 0;
-    CH.z = 3.6; CH.x = 0.9; CH.closeT = 0; CH.intro = 120; CH.tauntT = 0.8; CH.side = 1;
+    CH.z = 3.6; CH.x = 0; CH.closeT = 0; CH.intro = 50; CH.tauntT = 1.2; CH.side = 1; CH.slapped = false;
     nextRowS = 90; nextPowerS = 150; lastKind = ""; zoneShown = -1;
     LS.World.reset();
     for (let i = 0; i < 6; i++) addCoin(30 + i * 1.8, 0, 1.0);
-    ui.heat.classList.remove("show"); ui.taunt.classList.remove("show"); ui.toast.classList.remove("show"); ui.banner.classList.remove("show");
+    ui.taunt.classList.remove("show"); ui.toast.classList.remove("show"); ui.banner.classList.remove("show");
     ui.zone.textContent = "📍 " + LS.World.ZONES[0].name;
   }
   function startGame() {
@@ -290,7 +290,7 @@
     $("over-reason").textContent = reason || "";
     $("o-score").textContent = fmt(sc); $("o-dist").textContent = fmt(dist) + " m"; $("o-naira").textContent = "₦" + fmt(naira); $("o-best").textContent = fmt(best);
     $("newbest").classList.toggle("hidden", !isBest);
-    ui.heat.classList.remove("show");
+    CH.slapped = false;
   }
 
   function smash(e) {
@@ -311,7 +311,7 @@
     hits++;
     shake = 0.6;
     LS.Audio.hit();
-    if (CH.closeT > 0) { die(e.msg); return; }
+    if (CH.intro > 0 || CH.closeT > 0) { die(e.msg); return; }
     const bolt = selId === "thief";
     P.stumble = bolt ? 0.35 : 0.9;
     P.invuln = bolt ? 1.15 : 1.6;
@@ -494,9 +494,8 @@
       const far = camBack + 8;
       const near = pw.suya > 0 ? camBack + 3 : 3.55 - rushAt(dist) * 0.55;
       const tz = chasing ? near : far;
-      const ax = chasing ? P.x + CH.side * 0.9 : P.x + CH.side * 3.6;
       CH.z += (tz - CH.z) * Math.min(1, (chasing ? 3.4 : 1.7) * dt);
-      CH.x += (ax - CH.x) * Math.min(1, (chasing ? 8 : 3) * dt);
+      CH.x += (P.x - CH.x) * Math.min(1, (chasing ? 10 : 3) * dt);
       CH.tauntT -= dt;
       if (chasing && CH.tauntT <= 0 && CH.z < camBack - 2.2) {
         taunt("🟢⚪ AGBERO: " + pick(TAUNTS));
@@ -512,9 +511,15 @@
       deadT += dt;
       speed += (0 - speed) * Math.min(1, 5 * dt);
       prevDist = dist; dist += speed * dt;
-      CH.z += (0.9 - CH.z) * Math.min(1, 6 * dt);
-      CH.x += (P.x - CH.x) * Math.min(1, 8 * dt);
-      if (deadT > 1.15 && ui.over.classList.contains("hidden")) ui.over.classList.remove("hidden"), ui.hud.classList.add("hidden");
+      CH.z += (0.35 - CH.z) * Math.min(1, 8 * dt);
+      CH.x += (P.x - CH.x) * Math.min(1, 12 * dt);
+      if (!CH.slapped && deadT > 0.34) {
+        CH.slapped = true;
+        LS.Audio.slap();
+        shake = 1.5;
+        FX.burst(P.x + (CH.side || 1) * 0.2, 1.55, 0.1, 14, 0xffe4b0, 4, 0.45, 0.35);
+      }
+      if (deadT > 1.35 && ui.over.classList.contains("hidden")) ui.over.classList.remove("hidden"), ui.hud.classList.add("hidden");
     }
 
     // debris
@@ -555,7 +560,8 @@
       rig.head.rotation.y = 0;
       const runPh = (state === "over" ? 0 : time * (8 + speed * 0.28));
       if (state === "over") {
-        LS.pose.fall(rig, deadT * 3);
+        if (deadT < 0.62) LS.pose.slapped(rig, Math.min(1, deadT / 0.55), CH.side || 1);
+        else LS.pose.fall(rig, (deadT - 0.5) * 2.4);
       } else if (P.stumble > 0) {
         LS.pose.stumble(rig, 1 - P.stumble / 0.9, runPh);
       } else if (P.rolling) {
@@ -589,8 +595,13 @@
     if (showCh) {
       CH.phase += dt * (9 + speed * 0.3);
       agbero.root.position.set(CH.x, 0, CH.z);
-      agbero.root.rotation.y = Math.sin(time * 3) * 0.08;
-      if (state === "over") LS.pose.chase(agbero, time * 6); else LS.pose.chase(agbero, CH.phase);
+      if (state === "over") {
+        agbero.root.rotation.y = 0;
+        LS.pose.slap(agbero, Math.min(1, deadT / 0.5), -1);
+      } else {
+        agbero.root.rotation.y = Math.sin(time * 3) * 0.08;
+        LS.pose.chase(agbero, CH.phase);
+      }
     }
 
     // obstacles / coins / pickups
@@ -636,12 +647,6 @@
       setPowersUI();
       const mult = (pw.zobo > 0 ? 2 : 1) * (pw.suya > 0 ? 2 : 1);
       ui.mult.textContent = mult > 1 ? "x" + mult : "";
-      const onYou = CH.intro > 0 || CH.closeT > 0;
-      ui.heat.classList.toggle("show", onYou);
-      if (onYou) {
-        const pct = CH.closeT > 0 ? Math.min(100, (CH.closeT / 9) * 100) : Math.min(100, (CH.intro / 120) * 100);
-        ui.heat.firstElementChild.style.width = pct + "%";
-      }
     }
     if (toastT > 0 && (toastT -= dt) <= 0) ui.toast.classList.remove("show");
     if (tauntT > 0 && (tauntT -= dt) <= 0) ui.taunt.classList.remove("show");

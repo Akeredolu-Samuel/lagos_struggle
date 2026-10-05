@@ -14,12 +14,11 @@
       if (!AC) return null;
       actx = new AC();
       master = actx.createGain();
-      master.gain.value = muted ? 0 : 0.9;
-      const comp = actx.createDynamicsCompressor();
-      comp.threshold.value = -16; comp.ratio.value = 4;
-      master.connect(comp); comp.connect(actx.destination);
-      musicBus = actx.createGain(); musicBus.gain.value = 0.5; musicBus.connect(master);
-      sfxBus = actx.createGain(); sfxBus.gain.value = 0.95; sfxBus.connect(master);
+      master.gain.value = muted ? 0 : 1;
+      master.connect(actx.destination);
+      musicBus = actx.createGain(); musicBus.gain.value = 0.85; musicBus.connect(master);
+      sfxBus = actx.createGain(); sfxBus.gain.value = 1; sfxBus.connect(master);
+      try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
       const n = actx.sampleRate;
       noiseBuf = actx.createBuffer(1, n, actx.sampleRate);
       const d = noiseBuf.getChannelData(0);
@@ -29,24 +28,55 @@
     return actx;
   }
 
+  let htmlKick = null;
+  function prime() {
+    const ctx = ensure();
+    if (!ctx) return;
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+    if (ctx.state === "suspended") ctx.resume();
+    try {
+      const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.connect(ctx.destination); src.start(0);
+    } catch (e) {}
+    if (!htmlKick) {
+      htmlKick = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
+      htmlKick.loop = true;
+      htmlKick.setAttribute("playsinline", "");
+      htmlKick.volume = 0.01;
+    }
+    const p = htmlKick.play();
+    if (p && p.catch) p.catch(function () {});
+  }
+
   function tone(f, t, d, type, v, bus, to) {
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.type = type; o.frequency.setValueAtTime(f, t);
-    if (to) o.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + d);
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(v, t + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + d);
-    o.connect(g); g.connect(bus);
-    o.start(t); o.stop(t + d + 0.03);
+    if (!actx || !bus || !(f > 0) || !(d > 0.01)) return;
+    const now = actx.currentTime;
+    if (!(t > now)) t = now + 0.01;
+    try {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type; o.frequency.setValueAtTime(f, t);
+      if (to > 20) o.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + d);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(Math.max(0.0001, v), t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(g); g.connect(bus);
+      o.start(t); o.stop(t + d + 0.03);
+    } catch (e) {}
   }
   function noise(t, d, v, bus, hp, bp) {
-    const s = actx.createBufferSource(); s.buffer = noiseBuf;
-    const f = actx.createBiquadFilter();
-    f.type = hp ? "highpass" : "bandpass"; f.frequency.value = hp || bp || 1000;
-    const g = actx.createGain();
-    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
-    s.connect(f); f.connect(g); g.connect(bus);
-    s.start(t, Math.random() * 0.4); s.stop(t + d + 0.02);
+    if (!actx || !bus || !noiseBuf || !(d > 0.01)) return;
+    const now = actx.currentTime;
+    if (!(t > now)) t = now + 0.01;
+    try {
+      const s = actx.createBufferSource(); s.buffer = noiseBuf;
+      const f = actx.createBiquadFilter();
+      f.type = hp ? "highpass" : "bandpass"; f.frequency.value = hp || bp || 1000;
+      const g = actx.createGain();
+      g.gain.setValueAtTime(Math.max(0.0001, v), t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      s.connect(f); f.connect(g); g.connect(bus);
+      s.start(t, Math.random() * 0.4); s.stop(t + d + 0.02);
+    } catch (e) {}
   }
 
   /* Lagos Struggle theme — one 8-bar anthem, not a playlist. */
@@ -131,23 +161,39 @@
 
   function scheduler() {
     if (!actx) return;
+    if (actx.state === "suspended") { actx.resume(); return; }
     if (nextT < actx.currentTime - 0.5) nextT = actx.currentTime + 0.05;
     while (nextT < actx.currentTime + 0.16) {
-      playStep(step, nextT);
+      try { playStep(step, nextT); } catch (e) {}
       nextT += stepDur();
       step = (step + 1) % (THEME_BARS * 16);
     }
   }
 
-  const sfx = (fn) => () => { if (!ensure() || muted) return; fn(actx.currentTime); };
+  function beginMusic() {
+    if (!wantMusic || timer || !actx) return;
+    nextT = actx.currentTime + 0.05;
+    timer = setInterval(scheduler, 30);
+  }
+
+  const sfx = (fn) => () => { if (!ensure() || muted) return; prime(); fn(actx.currentTime); };
+
+  function onGesture() { prime(); if (wantMusic) beginMusic(); }
+  window.addEventListener("touchstart", onGesture, { passive: true });
+  window.addEventListener("touchend", onGesture, { passive: true });
+  window.addEventListener("pointerdown", onGesture, { passive: true });
 
   LS.Audio = {
-    unlock() { ensure(); },
+    unlock() { prime(); },
     startMusic() {
       wantMusic = true;
-      if (!ensure() || timer) return;
-      nextT = actx.currentTime + 0.08;
-      timer = setInterval(scheduler, 30);
+      if (!ensure()) return;
+      prime();
+      if (actx.state === "running") beginMusic();
+      else {
+        const r = actx.resume();
+        if (r && r.then) r.then(beginMusic); else beginMusic();
+      }
     },
     stopMusic() {
       wantMusic = false;
@@ -158,7 +204,7 @@
     toggleMute() {
       muted = !muted;
       try { localStorage.setItem(KEY, muted ? "1" : "0"); } catch (e) {}
-      if (master) master.gain.value = muted ? 0 : 0.9;
+      if (master) master.gain.value = muted ? 0 : 1;
       return muted;
     },
     coin: sfx((t) => { tone(1046, t, 0.07, "square", 0.09, sfxBus); tone(1568, t + 0.06, 0.12, "square", 0.08, sfxBus); }),
@@ -169,6 +215,11 @@
     lane: sfx((t) => { noise(t, 0.07, 0.12, sfxBus, 0, 2500); }),
     power: sfx((t) => { [523, 659, 784, 1046].forEach((f, k) => tone(f, t + k * 0.06, 0.14, "triangle", 0.2, sfxBus)); }),
     smash: sfx((t) => { noise(t, 0.28, 0.5, sfxBus, 0, 500); tone(150, t, 0.2, "sawtooth", 0.2, sfxBus, 50); }),
+    slap: sfx((t) => {
+      noise(t, 0.045, 0.75, sfxBus, 1600);
+      tone(220, t, 0.07, "square", 0.28, sfxBus, 55);
+      tone(1400, t, 0.03, "square", 0.12, sfxBus, 240);
+    }),
     hit: sfx((t) => {
       tone(2100, t, 0.045, "square", 0.2, sfxBus, 480);
       tone(3200, t, 0.03, "square", 0.1, sfxBus, 900);

@@ -392,6 +392,40 @@
       r.pivot.position.y = 0.95 - p * 0.42;
       r.armL.rotation.x = 2.6 * p; r.armR.rotation.x = 2.6 * p; r.legL.rotation.x = 0.3 * p; r.legR.rotation.x = -0.3 * p;
     },
+    // hand: -1 slaps with the left arm, +1 with the right. p is 0..1 through the swing.
+    slap(r, p, hand) {
+      reset(r);
+      const strike = p < 0.22 ? 0 : Math.min(1, (p - 0.22) / 0.14);
+      const arm = hand < 0 ? r.armL : r.armR;
+      const fore = hand < 0 ? r.foreL : r.foreR;
+      const back = hand < 0 ? r.armR : r.armL;
+      const backF = hand < 0 ? r.foreR : r.foreL;
+      r.body.rotation.y = -hand * (0.15 + strike * 0.55);
+      r.body.rotation.x = 0.1 + strike * 0.12;
+      r.head.rotation.y = -hand * 0.25;
+      arm.rotation.x = (1 - strike) * -0.55 + strike * 1.85;
+      arm.rotation.z = hand * ((1 - strike) * 1.15 - strike * 1.05);
+      fore.rotation.x = 0.25 + strike * 1.45;
+      back.rotation.x = 0.35;
+      backF.rotation.x = 0.9;
+      r.legL.rotation.x = hand < 0 ? 0.35 : -0.1;
+      r.legR.rotation.x = hand < 0 ? -0.1 : 0.35;
+    },
+    // fromSide is which side the slap comes from. The head snaps away from it.
+    slapped(r, p, fromSide) {
+      reset(r);
+      const hit = p < 0.3 ? 0 : Math.min(1, (p - 0.3) / 0.12);
+      r.head.rotation.z = -fromSide * hit * 1.05;
+      r.head.rotation.y = -fromSide * hit * 0.7;
+      r.body.rotation.z = -fromSide * hit * 0.5;
+      r.body.rotation.x = hit * 0.28;
+      r.pivot.position.x = -fromSide * hit * 0.28;
+      r.pivot.rotation.z = -fromSide * hit * 0.22;
+      r.armL.rotation.x = 0.5 + hit * 0.8;
+      r.armR.rotation.x = 0.4 + hit * 0.5;
+      r.kneeL.rotation.x = -0.55 * hit;
+      r.kneeR.rotation.x = -0.4 * hit;
+    },
     chase(r, ph) {
       pose.run(r, ph, 1.15, 0.3);
       const s = Math.sin(ph * 2);

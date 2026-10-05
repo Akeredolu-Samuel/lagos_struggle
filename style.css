@@ -20,10 +20,6 @@ button { font: inherit; color: inherit; border: 0; cursor: pointer; }
 .pill em { font-style: normal; z-index: 1; white-space: nowrap; }
 .pill span { z-index: 1; font-size: 1rem; }
 .pill u { position: absolute; left: 0; top: 0; bottom: 0; background: var(--c); opacity: .35; text-decoration: none; transition: width .15s linear; }
-#heat { position: absolute; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(300px, 80vw); display: none; text-align: center; }
-#heat.show { display: block; animation: pulse .6s infinite alternate; }
-#heat i { display: block; height: 8px; border-radius: 6px; background: linear-gradient(90deg, #ff3b30, #ffd60a); margin-bottom: 4px; box-shadow: 0 0 10px #ff3b30; }
-#heat span { font-weight: 900; font-size: .8rem; text-shadow: 0 2px 4px #000; color: #ffb4a8; }
 @keyframes pulse { from { opacity: .75; } to { opacity: 1; } }
 #toast { position: absolute; left: 50%; top: 24%; transform: translateX(-50%) scale(.9); max-width: 90vw; text-align: center; font-weight: 900; font-size: clamp(1rem, 4.4vw, 1.5rem); text-shadow: 0 2px 0 #000, 0 0 16px rgba(0,0,0,.7); opacity: 0; transition: opacity .2s, transform .2s; }
 #toast.show { opacity: 1; transform: translateX(-50%) scale(1); }
