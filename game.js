@@ -82,7 +82,7 @@
   const CHARS = LS.CHARACTERS;
   const rigs = {};
   CHARS.forEach((c) => { const r = c.build(); r.root.visible = false; scene.add(r.root); rigs[c.id] = r; });
-  const agbero = LS.buildAgbero(); agbero.root.visible = false; scene.add(agbero.root);
+  const agbero = LS.buildPolice(); agbero.root.visible = false; scene.add(agbero.root);
 
   let selId = "student";
   try { const s = localStorage.getItem("lagos-run-char"); if (s && rigs[s]) selId = s; } catch (e) {}
@@ -145,6 +145,7 @@
   function showSel() {
     const c = selChar();
     $("charname").textContent = c.name; $("chartag").textContent = c.tag; $("charperk").textContent = "★ " + c.perk;
+    $("charstory").textContent = c.story;
     for (const id in rigs) rigs[id].root.visible = (id === selId) && (state === "menu" || state === "playing" || state === "paused" || state === "over");
   }
 
@@ -275,8 +276,8 @@
     else if (!p && state === "paused") { state = "playing"; ui.pause.classList.add("hidden"); LS.Audio.startMusic(); }
   }
 
-  const DEATH = ["Agbero don catch you! Pay levy!", "Oga, na ₦500 for 'ticket'!", "Agbero collar you — Lagos no easy!", "You no pay union dues — Agbero win!"];
-  const TAUNTS = ["Oga! Come here!", "Where your ticket?!", "Pay levy now now!", "I go catch you!", "Stop there! Na me be Agbero!", "Give me ₦200!"];
+  const DEATH = ["Police don catch you!", "Oga, the green you steal don finish you!", "Black and white. You don enter cell!", "Police collar you — the union money no hide!"];
+  const TAUNTS = ["Stop! Police!", "Where the union green?!", "I go catch you!", "Halt there!", "Na me be police!", "The money no go follow you!"];
 
   function die(reason) {
     state = "over"; deadT = 0; shake = 1.2;
@@ -321,7 +322,7 @@
     CH.side = P.lane === 0 ? 1 : P.lane === 2 ? -1 : (Math.random() < 0.5 ? -1 : 1);
     if (CH.z > camBack - 1) CH.z = camBack + 0.35;
     LS.Audio.whistle();
-    toast(bolt ? (e.msg + "  Thief don bolt!") : (e.msg + "  Agbero dey run you!"), bolt ? "#d1c4ff" : "#ff8a80");
+    toast(bolt ? (e.msg + "  Thief don bolt!") : (e.msg + "  Police dey run you!"), bolt ? "#d1c4ff" : "#ff8a80");
     FX.burst(P.x, 1.0, 0, 12, 0xffffff, 4, 0.4, 0.5);
   }
 
@@ -416,7 +417,7 @@
       if (CH.closeT > 0) CH.closeT = Math.max(0, CH.closeT - dt);
       if (CH.intro <= 0 && CH.closeT <= 0 && CH.z < camBack) {
         CH.z = camBack + 8;
-        toast("Agbero don go small.", "#b9f6ca");
+        toast("Police don drop back.", "#e8e8e8");
         ui.taunt.classList.remove("show"); tauntT = 0;
       }
       LS.Audio.setTempo(1 + h * 0.22);
@@ -498,7 +499,7 @@
       CH.x += (P.x - CH.x) * Math.min(1, (chasing ? 10 : 3) * dt);
       CH.tauntT -= dt;
       if (chasing && CH.tauntT <= 0 && CH.z < camBack - 2.2) {
-        taunt("🟢⚪ AGBERO: " + pick(TAUNTS));
+        taunt("⬛⬜ POLICE: " + pick(TAUNTS));
         CH.tauntT = rnd(2.8, 4.4);
         if (Math.random() < 0.45) LS.Audio.horn();
       }

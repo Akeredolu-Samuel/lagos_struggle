@@ -454,30 +454,35 @@
     {
       id: "student", name: "Campus Student", emoji: "🎓", tag: "Backpack · Book-smart",
       perk: "Backpack packs a free Garri shield for the first 5 seconds.",
+      story: "You stole ₦1m from Iya Shalewa.",
       build: () => human({ skin: 0x8d5a34, shirt: 0xf4f6f8, accent: 0x1e3a8a, pants: 0x1c2a4a, shoes: 0xe63946, hair: "fade",
         backpack: 0xff7a00, backpackFlap: 0x1e3a8a, lanyard: true, sleeves: "short" }),
     },
     {
       id: "prince", name: "Afro Prince", emoji: "🎤", tag: "Braids · Gold chain · Red jacket",
       perk: "Hype! Every naira note is worth 25% more.",
+      story: "You carry ballot box.",
       build: () => human({ skin: 0x6b4226, shirt: 0xd62839, accent: 0x111111, sleeves: "long", pants: 0x16161c, shoes: 0xffffff,
         hair: "braids", chain: true, earring: true }),
     },
     {
       id: "crooner", name: "Smooth Crooner", emoji: "🕶️", tag: "Cap · Shades · Bomber",
-      perk: "Smooth talker — the Agbero falls back much faster.",
+      perk: "Smooth talker — the police fall back much faster.",
+      story: "You shoot person.",
       build: () => human({ skin: 0x7b4b2a, shirt: 0x23232b, accent: 0xffd60a, sleeves: "long", pants: 0xcfd8dc, shoes: 0xffd60a,
         hair: "none", hat: "cap", hatColor: 0x111116, shades: true, chain: true }),
     },
     {
       id: "king", name: "Gbedu King", emoji: "👑", tag: "Dreads · Ankara · Swagger",
       perk: "Gbedu flow — distance score grows 25% faster.",
+      story: "You stole ₦1m from Iya Shalewa.",
       build: () => human({ skin: 0x5a3825, shirtTex: ankaraTex(0x0b8f4e, 0xffc107, 0xffffff), shirtTexKey: "king", sleeves: "short",
         pants: 0x1c3b2b, shoes: 0x7a4a24, hair: "dreads", shades: true, chain: true, earring: true }),
     },
     {
       id: "trader", name: "Market Trader", emoji: "🧺", tag: "Basket on head · Hustler",
       perk: "Hustle! Boosters (garri, suya…) last 30% longer.",
+      story: "You carry ballot box.",
       build: () => human({ skin: 0x7b4b2a, shirtTex: ankaraTex(0x1b5fbf, 0xff8a1f, 0xfff1c9), shirtTexKey: "trader", sleeves: "short",
         pants: 0x5b4636, shoes: 0x2a2a2a, hair: "none", hat: "fila", hatColor: 0xc0392b, basket: "wicker", beard: true,
         goods: [0xe53935, 0xff9800, 0x43a047, 0xe53935, 0xffeb3b, 0x43a047, 0xe53935] }),
@@ -485,21 +490,25 @@
     {
       id: "thief", name: "Area Thief", emoji: "🥷", tag: "Hood · Mask · Quick legs",
       perk: "Bolt! Hit an obstacle and you dash faster instead of slowing down.",
+      story: "You shoot person.",
       build: () => human({ skin: 0x6b4226, shirt: 0x161616, accent: 0x0a0a0a, sleeves: "long", pants: 0x101010, shoes: 0xf2f2f2,
         hair: "none", hat: "hood", hatColor: 0x121212, mask: 0x1c1c1c, shades: true,
         backpack: 0x2a2a2a, backpackFlap: 0x111111 }),
     },
   ];
 
-  /* The Agbero who chases you: white top, green trousers, green cap + sash */
-  function buildAgbero() {
-    return human({ skin: 0x5a3825, shirt: 0xffffff, sleeves: "long", accent: 0x138a36, sash: 0x138a36, pants: 0x138a36, shoes: 0xf2f2f2,
-      hair: "none", hat: "fila", hatColor: 0x138a36, beard: true, scale: 1.05 });
+  /* Police who chase you: black jacket, white trousers, black cap. */
+  function buildPolice() {
+    const r = human({ skin: 0x5a3825, shirt: 0x141414, sleeves: "long", accent: 0xf5f5f5, pants: 0xf4f4f4, shoes: 0x111111,
+      hair: "none", hat: "cap", hatColor: 0x111111, scale: 1.05 });
+    box(0.2, 0.16, 0.04, 0xf7f7f7, 0.16, 1.26, -0.23, r.body);
+    box(0.1, 0.1, 0.03, 0xbdbdbd, 0.16, 1.26, -0.25, r.body);
+    return r;
   }
 
   LS.util = { G, M, B, MT, BT, mesh, box, css, pick, rnd, canvasTex, signTex, ankaraTex, ghanaTex, umbrellaTex, glowTex, shadowTex, blob };
   LS.human = human;
   LS.pose = pose;
   LS.CHARACTERS = CHARACTERS;
-  LS.buildAgbero = buildAgbero;
+  LS.buildPolice = buildPolice;
 })();
