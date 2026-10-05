@@ -25,8 +25,8 @@ button { font: inherit; color: inherit; border: 0; cursor: pointer; }
 #toast.show { opacity: 1; transform: translateX(-50%) scale(1); }
 #taunt { position: absolute; left: 50%; bottom: 17%; transform: translateX(-50%); max-width: 90vw; padding: 7px 14px; border-radius: 14px; background: #fff; color: #0b6b3a; font-weight: 900; font-size: clamp(.8rem, 3.4vw, 1.05rem); border: 3px solid #138a36; opacity: 0; transition: opacity .2s; white-space: nowrap; }
 #taunt.show { opacity: 1; }
-#banner { position: absolute; left: max(12px, env(safe-area-inset-left)); top: 108px; transform: translateY(-8px); text-align: left; opacity: 0; transition: opacity .4s, transform .4s; padding: 8px 14px; border-radius: 14px; background: linear-gradient(135deg, rgba(11,143,78,.92), rgba(6,60,34,.92)); border: 2px solid #fff; box-shadow: 0 8px 30px rgba(0,0,0,.5); max-width: min(280px, 70vw); }
-#banner.show { opacity: 1; transform: translateY(0); }
+#banner { position: absolute; left: 50%; top: max(62px, calc(env(safe-area-inset-top) + 54px)); transform: translate(-50%, -8px); text-align: center; opacity: 0; transition: opacity .4s, transform .4s; padding: 8px 18px; border-radius: 14px; background: linear-gradient(135deg, rgba(11,143,78,.92), rgba(6,60,34,.92)); border: 2px solid #fff; box-shadow: 0 8px 30px rgba(0,0,0,.5); max-width: min(92vw, 440px); }
+#banner.show { opacity: 1; transform: translate(-50%, 0); }
 #banner small { display: block; font-size: .65rem; letter-spacing: .2em; opacity: .85; font-weight: 800; }
 #banner b { display: block; font-size: clamp(1.2rem, 5vw, 1.8rem); font-weight: 900; margin: 2px 0; }
 #banner span { font-size: .8rem; opacity: .9; }

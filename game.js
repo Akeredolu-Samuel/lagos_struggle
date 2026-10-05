@@ -247,7 +247,7 @@
     for (const k in pw) pw[k] = 0;
     if (selId === "student") pw.garri = 5;
     P.lane = P.prev = 1; P.x = 0; P.y = 0; P.vy = 0; P.ground = true; P.rolling = false; P.rollT = 0; P.queueRoll = false; P.stumble = 0; P.invuln = 0; P.phase = 0;
-    CH.z = 3.6; CH.x = 0; CH.closeT = 0; CH.intro = 50; CH.tauntT = 1.2; CH.side = 1; CH.slapped = false;
+    CH.z = 3.6; CH.x = 0; CH.closeT = 0; CH.intro = 6; CH.tauntT = 1.2; CH.side = 1; CH.slapped = false;
     nextRowS = 90; nextPowerS = 150; lastKind = ""; zoneShown = -1;
     LS.World.reset();
     for (let i = 0; i < 6; i++) addCoin(30 + i * 1.8, 0, 1.0);
@@ -317,7 +317,7 @@
     P.invuln = bolt ? 1.15 : 1.6;
     slow = bolt ? 1 : 0.5;
     if (bolt) dash = 3.4;
-    CH.closeT = (selId === "crooner" ? 5.5 : 7.5) * (1 + rushAt(dist) * 0.85); CH.tauntT = 0.15;
+    CH.closeT = selId === "crooner" ? 4 : 6; CH.tauntT = 0.15;
     CH.side = P.lane === 0 ? 1 : P.lane === 2 ? -1 : (Math.random() < 0.5 ? -1 : 1);
     if (CH.z > camBack - 1) CH.z = camBack + 0.35;
     LS.Audio.whistle();
@@ -413,7 +413,7 @@
       if (P.stumble > 0) P.stumble -= dt;
       if (P.invuln > 0) P.invuln -= dt;
       if (CH.intro > 0) CH.intro = Math.max(0, CH.intro - dt);
-      if (CH.closeT > 0) CH.closeT = Math.max(0, CH.closeT - dt * (selId === "crooner" ? 1.7 : 1));
+      if (CH.closeT > 0) CH.closeT = Math.max(0, CH.closeT - dt);
       if (CH.intro <= 0 && CH.closeT <= 0 && CH.z < camBack) {
         CH.z = camBack + 8;
         toast("Agbero don go small.", "#b9f6ca");
@@ -489,7 +489,7 @@
       coins = coins.filter((c) => { if (c.got || c.s < dist - 18) { scene.remove(c.m); coinPool.push(c.m); return false; } return true; });
       pickups = pickups.filter((p) => { if (p.got || p.s < dist - 18) { scene.remove(p.m); return false; } return true; });
 
-      // chaser — with you for the first 2 minutes, then only after a hit
+      // chaser — on you for ~6s like the Subway Surfers guard, then the gap opens
       const chasing = CH.intro > 0 || CH.closeT > 0;
       const far = camBack + 8;
       const near = pw.suya > 0 ? camBack + 3 : 3.55 - rushAt(dist) * 0.55;
