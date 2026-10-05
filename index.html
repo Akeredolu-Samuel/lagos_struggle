@@ -2,67 +2,91 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b8f4e" />
   <title>Lagos Struggle — Run Am!</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <canvas id="game" width="480" height="720"></canvas>
+  <canvas id="game"></canvas>
 
-    <div id="hud" class="hidden">
-      <div class="hud-left">
-        <div class="stat">₦ <span id="score">0</span></div>
-        <div class="stat small">Best ₦ <span id="best">0</span></div>
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-top">
+      <div class="hud-l">
+        <div class="score"><span id="score">0</span><b id="mult"></b></div>
+        <div class="sub"><span class="naira">₦<span id="naira">0</span></span> · <span id="dist">0</span> m</div>
+        <div id="zonechip">📍 Oshodi</div>
       </div>
-      <div class="hud-right">
-        <div class="stat small">x<span id="mult">1</span> · <span id="dist">0</span>m</div>
+      <div class="hud-r">
+        <button id="btn-mute" class="icon">🔊</button>
+        <button id="btn-pause" class="icon">❚❚</button>
       </div>
     </div>
-    <div id="power-bar" class="hidden"></div>
-    <div id="event-banner" class="hidden"></div>
+    <div id="powers"></div>
+    <div id="heat"><i></i><span>🚨 AGBERO DEY CLOSE!</span></div>
+    <div id="toast"></div>
+    <div id="taunt"></div>
+    <div id="banner"></div>
+  </div>
 
-    <div id="overlay" class="screen">
-      <div class="card">
-        <p class="tag">NAIJA RUNNER</p>
-        <h1>LAGOS<br/>STRUGGLE</h1>
-        <p class="credit">built by samwissy</p>
-        <p class="sub">Run the streets. Dodge wahala. Collect naira.</p>
-        <p class="section-label">Choose your runner</p>
-        <div id="char-grid" class="char-grid"></div>
-        <button id="btn-start" class="btn primary">Start Running</button>
-        <div class="howto-mini">
-          <span><kbd>←</kbd><kbd>→</kbd> lanes</span>
-          <span><kbd>↑</kbd> jump</span>
-          <span><kbd>↓</kbd> roll</span>
-        </div>
-        <p class="hint">Swipe · Tap top = jump · Tap bottom = roll</p>
-      </div>
+  <!-- MENU / CHARACTER SELECT -->
+  <div id="menu" class="screen">
+    <div class="menu-head">
+      <div class="flag"><i></i><i></i><i></i></div>
+      <h1>LAGOS<br /><span>STRUGGLE</span></h1>
+      <p class="tagline">Endless run through Lagos · Dodge danfo · Escape the Agbero</p>
     </div>
-
-    <div id="gameover" class="screen hidden">
-      <div class="card">
-        <p class="tag bad">YOU FALL DOWN!</p>
-        <h2 id="death-line">Wahala don catch you.</h2>
-        <div class="result-grid">
-          <div><span class="lbl">Naira</span><strong>₦<span id="final-score">0</span></strong></div>
-          <div><span class="lbl">Distance</span><strong><span id="final-dist">0</span>m</strong></div>
-          <div><span class="lbl">Best</span><strong>₦<span id="final-best">0</span></strong></div>
-          <div><span class="lbl">Coins</span><strong id="final-coins">0</strong></div>
-        </div>
-        <button id="btn-retry" class="btn primary">Run Again</button>
-        <button id="btn-home" class="btn ghost">Change Character</button>
+    <div class="menu-panel">
+      <p class="label">Choose your runner</p>
+      <div id="chars" class="chars"></div>
+      <div class="info">
+        <h2 id="charname"></h2>
+        <p id="chartag" class="ctag"></p>
+        <p id="charperk" class="perk"></p>
       </div>
-    </div>
-
-    <div id="pause" class="screen hidden">
-      <div class="card compact">
-        <h2>Paused</h2>
-        <button id="btn-resume" class="btn primary">Continue</button>
-        <button id="btn-quit" class="btn ghost">Quit to Menu</button>
+      <button id="btn-start" class="btn go">RUN AM! ▶</button>
+      <div class="meta">
+        <span>Best <b id="menu-best">0</b></span>
+        <span>Wallet ₦<b id="menu-wallet">0</b></span>
+        <button id="menu-mute" class="link">🔊 Sound on</button>
       </div>
+      <p class="hint">← → change lane · ↑ jump · ↓ roll &nbsp;|&nbsp; Swipe on phone</p>
     </div>
   </div>
+
+  <!-- GAME OVER -->
+  <div id="over" class="screen hidden">
+    <div class="card">
+      <p class="chip bad">AGBERO CATCH YOU!</p>
+      <h2 id="over-line">Pay levy!</h2>
+      <p id="over-reason" class="reason"></p>
+      <p id="newbest" class="newbest hidden">🏆 NEW BEST!</p>
+      <div class="grid">
+        <div><span>Score</span><b id="o-score">0</b></div>
+        <div><span>Distance</span><b id="o-dist">0</b></div>
+        <div><span>Naira</span><b id="o-naira">0</b></div>
+        <div><span>Best</span><b id="o-best">0</b></div>
+      </div>
+      <button id="btn-retry" class="btn go">RUN AGAIN</button>
+      <button id="btn-home" class="btn ghost">Change Character</button>
+    </div>
+  </div>
+
+  <!-- PAUSE -->
+  <div id="pause" class="screen hidden">
+    <div class="card small">
+      <h2>Paused</h2>
+      <button id="btn-resume" class="btn go">Continue</button>
+      <button id="btn-quit" class="btn ghost">Quit to Menu</button>
+    </div>
+  </div>
+
+  <script src="three.min.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/models.js"></script>
+  <script src="js/props.js"></script>
+  <script src="js/world.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
