@@ -85,7 +85,6 @@
   const agbero = LS.buildPolice(); agbero.root.visible = false; scene.add(agbero.root);
 
   let selId = "student";
-  try { const s = localStorage.getItem("lagos-run-char"); if (s && rigs[s]) selId = s; } catch (e) {}
   const selChar = () => CHARS.find((c) => c.id === selId);
 
   const shieldMesh = new T.Mesh(new T.SphereGeometry(1.35, 18, 12), new T.MeshBasicMaterial({ color: 0xf3e3a0, transparent: true, opacity: 0.28, depthWrite: false }));
@@ -104,8 +103,24 @@
   let state = "menu";
   let time = 0, dist = 0, prevDist = 0, speed = 0, slow = 1, startRamp = 0, dash = 0;
   let scoreF = 0, naira = 0, coinCount = 0, shown = { s: -1, n: -1, d: -1 };
-  let best = 0, wallet = 0;
+  let best = 0, wallet = 0, lostRound = false;
   try { best = Number(localStorage.getItem("lagos-run-best") || 0); wallet = Number(localStorage.getItem("lagos-run-wallet") || 0); } catch (e) {}
+  let owned = { student: true };
+  let stock = { garri: 0, groundnut: 0, suya: 0, zobo: 0, jollof: 0 };
+  let armed = null;
+  try {
+    owned = Object.assign(owned, JSON.parse(localStorage.getItem("lagos-run-owned") || "{}"));
+    stock = Object.assign(stock, JSON.parse(localStorage.getItem("lagos-run-stock") || "{}"));
+  } catch (e) {}
+  function saveShop() {
+    try {
+      localStorage.setItem("lagos-run-owned", JSON.stringify(owned));
+      localStorage.setItem("lagos-run-stock", JSON.stringify(stock));
+      localStorage.setItem("lagos-run-wallet", String(wallet));
+    } catch (e) {}
+  }
+  const locked = (c) => !!(c && c.price && !owned[c.id]);
+  try { const s = localStorage.getItem("lagos-run-char"); if (s && rigs[s] && !locked(CHARS.find((c) => c.id === s))) selId = s; } catch (e) {}
   const pw = { garri: 0, groundnut: 0, suya: 0, zobo: 0, jollof: 0 };
   let obstacles = [], coins = [], pickups = [], debris = [];
   const coinPool = [];
@@ -131,13 +146,29 @@
     LS.Audio.zone();
   }
 
+  function buyChar(c) {
+    if (!c.price || owned[c.id]) return true;
+    if (wallet < c.price) return false;
+    wallet -= c.price; owned[c.id] = true; saveShop(); LS.Audio.power();
+    return true;
+  }
   function buildMenu() {
     const grid = $("chars"); grid.innerHTML = "";
     CHARS.forEach((c) => {
       const b = document.createElement("button");
-      b.type = "button"; b.className = "char" + (c.id === selId ? " sel" : "");
-      b.innerHTML = `<i>${c.emoji}</i><b>${c.name}</b>`;
-      b.onclick = () => { selId = c.id; try { localStorage.setItem("lagos-run-char", selId); } catch (e) {} LS.Audio.ui(); showSel(); buildMenu(); };
+      const isLocked = locked(c);
+      b.type = "button"; b.className = "char" + (c.id === selId ? " sel" : "") + (isLocked ? " locked" : "");
+      b.innerHTML = `<i>${isLocked ? "🔒" : c.emoji}</i><b>${c.name}</b>` + (isLocked ? `<em>₦${fmt(c.price)}</em>` : "");
+      b.onclick = () => {
+        if (isLocked) {
+          LS.Audio.ui(); showSel();
+          $("charstory").textContent = lostRound
+            ? ("Locked. Buy am for ₦" + fmt(c.price) + " in the market.")
+            : "Locked. Run first. Market open after police catch you.";
+          return;
+        }
+        selId = c.id; try { localStorage.setItem("lagos-run-char", selId); } catch (e) {} LS.Audio.ui(); updateBestUI(); showSel(); buildMenu();
+      };
       grid.appendChild(b);
     });
     showSel();
@@ -145,11 +176,67 @@
   function showSel() {
     const c = selChar();
     $("charname").textContent = c.name; $("chartag").textContent = c.tag; $("charperk").textContent = "★ " + c.perk;
-    $("charstory").textContent = c.story;
+    $("charstory").textContent = locked(c) ? ("Locked. ₦" + fmt(c.price) + " for this one.") : c.story;
     for (const id in rigs) rigs[id].root.visible = (id === selId) && (state === "menu" || state === "playing" || state === "paused" || state === "over");
   }
 
-  function updateBestUI() { $("menu-best").textContent = fmt(best); $("menu-wallet").textContent = fmt(wallet); }
+  function updateBestUI() {
+    $("menu-best").textContent = fmt(best); $("menu-wallet").textContent = fmt(wallet);
+    const w = $("shop-wallet"); if (w) w.textContent = fmt(wallet);
+  }
+  function buildShop() {
+    const msg = $("shop-msg");
+    const chars = $("shop-chars"); chars.innerHTML = "";
+    CHARS.forEach((c) => {
+      const row = document.createElement("div"); row.className = "shop-row";
+      const have = !c.price || owned[c.id];
+      row.innerHTML = `<div><b>${c.emoji} ${c.name}</b><span>${have ? "Owned" : "₦" + fmt(c.price)}</span></div>`;
+      const acts = document.createElement("div"); acts.className = "acts";
+      const btn = document.createElement("button");
+      btn.type = "button"; btn.textContent = have ? (c.id === selId ? "USING" : "USE") : "BUY";
+      if (c.id === selId) btn.className = "on";
+      btn.onclick = () => {
+        if (!have && !buyChar(c)) { msg.textContent = "You no get money for " + c.name + "."; LS.Audio.ui(); return; }
+        selId = c.id; try { localStorage.setItem("lagos-run-char", selId); } catch (e) {}
+        msg.textContent = have ? (c.name + " ready.") : ("You buy " + c.name + ".");
+        LS.Audio.ui(); updateBestUI(); showSel(); buildMenu(); buildShop();
+      };
+      acts.appendChild(btn); row.appendChild(acts); chars.appendChild(row);
+    });
+    const items = $("shop-items"); items.innerHTML = "";
+    Object.keys(POWERS).forEach((id) => {
+      const p = POWERS[id];
+      const row = document.createElement("div"); row.className = "shop-row";
+      row.innerHTML = `<div><b>${p.icon} ${p.name}</b><span>${p.desc} · you get ${stock[id] || 0}</span></div>`;
+      const acts = document.createElement("div"); acts.className = "acts";
+      const buy = document.createElement("button"); buy.type = "button"; buy.textContent = "₦" + fmt(p.price);
+      buy.onclick = () => {
+        if (wallet < p.price) { msg.textContent = "That booster cost ₦" + fmt(p.price) + ". You no reach."; LS.Audio.ui(); return; }
+        wallet -= p.price; stock[id] = (stock[id] || 0) + 1; saveShop();
+        msg.textContent = "You buy " + p.name + ". Use am before you run.";
+        LS.Audio.power(); updateBestUI(); buildShop();
+      };
+      const use = document.createElement("button"); use.type = "button";
+      use.textContent = armed === id ? "ARMED" : "USE";
+      if (armed === id) use.className = "on";
+      use.onclick = () => {
+        if (!(stock[id] > 0)) { msg.textContent = "Buy am first."; LS.Audio.ui(); return; }
+        armed = armed === id ? null : id;
+        msg.textContent = armed ? (p.name + " go start with you. One charge.") : "Booster cancelled.";
+        LS.Audio.ui(); buildShop();
+      };
+      acts.appendChild(buy); acts.appendChild(use); row.appendChild(acts); items.appendChild(row);
+    });
+    updateBestUI();
+  }
+  function shopOpen() { const s = $("shop"); return s && !s.classList.contains("hidden"); }
+  function openShop() {
+    if (!lostRound) return;
+    buildShop();
+    $("shop-msg").textContent = armed ? ("Next run: " + POWERS[armed].name) : "You don lose. Now you fit buy.";
+    $("shop").classList.remove("hidden");
+  }
+  function closeShop() { $("shop").classList.add("hidden"); }
 
   function setPowersUI() {
     let html = "";
@@ -246,7 +333,12 @@
     dist = 0; prevDist = 0; speed = 12; slow = 1; startRamp = 0; dash = 0; scoreF = 0; naira = 0; coinCount = 0; hits = 0; deadT = 0; shake = 0;
     shown = { s: -1, n: -1, d: -1 };
     for (const k in pw) pw[k] = 0;
-    if (selId === "student") pw.garri = 5;
+    if (locked(selChar())) selId = "student";
+    if (armed && stock[armed] > 0 && POWERS[armed]) {
+      stock[armed] -= 1; pw[armed] = POWERS[armed].dur * perkMul();
+      armed = null; saveShop();
+    }
+    if (selId === "student") pw.garri = Math.max(pw.garri, 5);
     P.lane = P.prev = 1; P.x = 0; P.y = 0; P.vy = 0; P.ground = true; P.rolling = false; P.rollT = 0; P.queueRoll = false; P.stumble = 0; P.invuln = 0; P.phase = 0;
     CH.z = 3.6; CH.x = 0; CH.closeT = 0; CH.intro = 6; CH.tauntT = 1.2; CH.side = 1; CH.slapped = false;
     nextRowS = 90; nextPowerS = 150; lastKind = ""; zoneShown = -1;
@@ -260,7 +352,7 @@
     LS.Audio.startMusic();
     resetGame();
     state = "playing";
-    ui.menu.classList.add("hidden"); ui.over.classList.add("hidden"); ui.pause.classList.add("hidden"); ui.hud.classList.remove("hidden");
+    ui.menu.classList.add("hidden"); ui.over.classList.add("hidden"); ui.pause.classList.add("hidden"); $("shop").classList.add("hidden"); ui.hud.classList.remove("hidden");
     showSel();
   }
   function toMenu() {
@@ -280,7 +372,8 @@
   const TAUNTS = ["Stop! Police!", "Where the union green?!", "I go catch you!", "Halt there!", "Na me be police!", "The money no go follow you!"];
 
   function die(reason) {
-    state = "over"; deadT = 0; shake = 1.2;
+    state = "over"; deadT = 0; shake = 1.2; lostRound = true;
+    $("btn-shop").classList.remove("hidden");
     LS.Audio.caught(); LS.Audio.stopMusic();
     const sc = Math.floor(scoreF);
     const isBest = sc > best;
@@ -354,6 +447,10 @@
   }
   window.addEventListener("keydown", (e) => {
     const c = e.code;
+    if (shopOpen()) {
+      if (c === "Escape") { e.preventDefault(); closeShop(); }
+      return;
+    }
     if (c === "ArrowLeft" || c === "KeyA") { e.preventDefault(); setLane(P.lane - 1); }
     else if (c === "ArrowRight" || c === "KeyD") { e.preventDefault(); setLane(P.lane + 1); }
     else if (c === "ArrowUp" || c === "KeyW" || c === "Space") { e.preventDefault(); if (state === "menu" || state === "over") startGame(); else jump(); }
@@ -378,6 +475,9 @@
 
   function updMute(m) { $("btn-mute").textContent = m ? "🔇" : "🔊"; $("menu-mute").textContent = m ? "🔇 Sound off" : "🔊 Sound on"; }
   $("btn-start").onclick = startGame;
+  $("btn-shop").onclick = openShop;
+  $("btn-shop-close").onclick = closeShop;
+  $("btn-market").onclick = openShop;
   $("btn-retry").onclick = startGame;
   $("btn-home").onclick = toMenu;
   $("btn-resume").onclick = () => setPaused(false);

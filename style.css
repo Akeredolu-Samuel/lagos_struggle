@@ -47,7 +47,9 @@ h1 span { color: #111; -webkit-text-stroke: 1px #fff; }
 .chars { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; }
 .chars::-webkit-scrollbar { display: none; }
 .char:first-child { margin-left: auto; } .char:last-child { margin-right: auto; }
-.char { flex: 0 0 auto; width: 70px; padding: 8px 4px; border-radius: 14px; background: rgba(255,255,255,.1); border: 2px solid rgba(255,255,255,.28); backdrop-filter: blur(6px); transition: transform .12s, border-color .12s, background .12s; }
+.char { flex: 0 0 auto; width: 78px; padding: 8px 4px; border-radius: 14px; background: rgba(255,255,255,.1); border: 2px solid rgba(255,255,255,.28); backdrop-filter: blur(6px); transition: transform .12s, border-color .12s, background .12s; }
+.char.locked { opacity: .72; }
+.char em { display: block; font-style: normal; font-size: .55rem; font-weight: 800; margin-top: 2px; }
 .char i { display: block; font-style: normal; font-size: 1.7rem; line-height: 1.1; }
 .char b { display: block; font-size: .64rem; font-weight: 800; margin-top: 3px; line-height: 1.1; }
 .char.sel { border-color: #fff; background: rgba(0,0,0,.82); transform: translateY(-4px) scale(1.05); box-shadow: 0 6px 18px rgba(0,0,0,.4); }
@@ -70,6 +72,17 @@ h1 span { color: #111; -webkit-text-stroke: 1px #fff; }
 .card { width: min(380px, 100%); text-align: center; padding: 22px 18px; border-radius: 22px; background: linear-gradient(160deg, #1a1a1a, #050505); border: 2.5px solid #fff; box-shadow: 0 18px 50px rgba(0,0,0,.55); }
 .card.small { width: min(300px, 100%); }
 .chip { display: inline-block; padding: 4px 12px; border-radius: 999px; background: #111; border: 1.5px solid #fff; font-size: .7rem; font-weight: 900; letter-spacing: .14em; }
+#shop { z-index: 20; justify-content: center; background: rgba(0,0,0,.84); }
+.shop-card { width: min(460px, 100%); max-height: min(92vh, 760px); overflow: auto; text-align: center; padding: 18px 14px 14px; border-radius: 22px; background: #0d0d0d; border: 2.5px solid #fff; }
+.shop-card h2 { font-size: 1.3rem; margin: 6px 0; }
+.shop-wallet { font-weight: 900; margin-bottom: 6px; }
+.shop-msg { min-height: 1.2em; font-size: .8rem; font-weight: 800; margin-bottom: 8px; }
+.shop-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; text-align: left; padding: 8px 10px; margin-bottom: 6px; border-radius: 12px; border: 1px solid rgba(255,255,255,.28); background: rgba(255,255,255,.06); }
+.shop-row b { display: block; font-size: .82rem; }
+.shop-row span { display: block; font-size: .68rem; opacity: .85; }
+.shop-row .acts { display: flex; gap: 6px; flex: 0 0 auto; }
+.shop-row button { padding: 8px 8px; border-radius: 10px; background: #fff; color: #111; font-weight: 900; font-size: .68rem; }
+.shop-row button.on { background: #111; color: #fff; border: 1px solid #fff; }
 #story { justify-content: flex-end; background: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.88)); }
 .story-card { width: min(460px, 100%); text-align: center; padding: 22px 18px 18px; border-radius: 22px; background: #0d0d0d; color: #fff; border: 2.5px solid #fff; box-shadow: 0 18px 50px rgba(0,0,0,.6); margin-bottom: 8px; }
 .story-card h2 { font-size: 1.45rem; font-weight: 900; margin: 8px 0; }

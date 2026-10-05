@@ -46,12 +46,28 @@
         <p id="charstory" class="charstory"></p>
       </div>
       <button id="btn-start" class="btn go">RUN AM! ▶</button>
+      <button id="btn-shop" class="btn ghost hidden">MARKET</button>
       <div class="meta">
         <span>Best <b id="menu-best">0</b></span>
         <span>Wallet ₦<b id="menu-wallet">0</b></span>
         <button id="menu-mute" class="link">🔊 Sound on</button>
       </div>
       <p class="hint">← → change lane · ↑ jump · ↓ roll &nbsp;|&nbsp; Swipe on phone</p>
+    </div>
+  </div>
+
+  <!-- MARKET -->
+  <div id="shop" class="screen hidden">
+    <div class="shop-card">
+      <p class="chip">MARKET</p>
+      <h2>Buy am. E cost.</h2>
+      <p class="shop-wallet">Wallet ₦<b id="shop-wallet">0</b></p>
+      <p id="shop-msg" class="shop-msg"></p>
+      <p class="label">Runners</p>
+      <div id="shop-chars"></div>
+      <p class="label">Boosters — buy, then use</p>
+      <div id="shop-items"></div>
+      <button id="btn-shop-close" class="btn ghost">Back</button>
     </div>
   </div>
 
@@ -69,6 +85,7 @@
         <div><span>Best</span><b id="o-best">0</b></div>
       </div>
       <button id="btn-retry" class="btn go">RUN AGAIN</button>
+      <button id="btn-market" class="btn ghost">MARKET</button>
       <button id="btn-home" class="btn ghost">Change Character</button>
     </div>
   </div>

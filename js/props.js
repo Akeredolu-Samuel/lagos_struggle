@@ -207,11 +207,11 @@
 
   /* ───────── boosters ───────── */
   const POWERS = {
-    garri:     { name: "GARRI SHIELD", icon: "🥣", dur: 8,  color: 0xf3e3a0, css: "#f3e3a0", desc: "Strong! Blocks one crash" },
-    groundnut: { name: "GROUNDNUT MAGNET", icon: "🥜", dur: 9, color: 0xe0a458, css: "#e0a458", desc: "Naira flies to you" },
-    suya:      { name: "SUYA RUSH", icon: "🍢", dur: 5.5, color: 0xff6a2b, css: "#ff7a3b", desc: "Turbo dash — smash everything" },
-    zobo:      { name: "ZOBO x2", icon: "🥤", dur: 10, color: 0xc2185b, css: "#e91e63", desc: "Double score" },
-    jollof:    { name: "JOLLOF JUMP", icon: "🍛", dur: 9, color: 0xff5722, css: "#ff7043", desc: "Mega jump over danfo" },
+    garri:     { name: "GARRI SHIELD", icon: "🥣", dur: 8,  price: 25000, color: 0xf3e3a0, css: "#f3e3a0", desc: "Strong! Blocks one crash" },
+    groundnut: { name: "GROUNDNUT MAGNET", icon: "🥜", dur: 9, price: 40000, color: 0xe0a458, css: "#e0a458", desc: "Naira flies to you" },
+    zobo:      { name: "ZOBO x2", icon: "🥤", dur: 10, price: 60000, color: 0xc2185b, css: "#e91e63", desc: "Double score" },
+    jollof:    { name: "JOLLOF JUMP", icon: "🍛", dur: 9, price: 75000, color: 0xff5722, css: "#ff7043", desc: "Mega jump over danfo" },
+    suya:      { name: "SUYA RUSH", icon: "🍢", dur: 5.5, price: 120000, color: 0xff6a2b, css: "#ff7a3b", desc: "Turbo dash — smash everything" },
   };
   const haloMats = {};
   function halo(color) {
